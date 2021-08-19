@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MenuDialog extends JDialog {
     private JPanel contentPane;
@@ -48,10 +51,18 @@ public class MenuDialog extends JDialog {
         solveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                solving();
+                solving(gameBoard);
             }
         });
 
+        generateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generate();
+                gameBoard = prepareBoardForUser(gameBoard);
+                jTable.updateUI();
+            }
+        });
 
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(new ActionListener() {
@@ -67,7 +78,7 @@ public class MenuDialog extends JDialog {
     }
 
     // main solving function
-    void solving (){
+    String[][] solving (String[][] board){
 
         // copying grid entered by user to working table
         solutionBoard = gameBoard;
@@ -113,6 +124,8 @@ public class MenuDialog extends JDialog {
         System.out.println("LOOOP: " + testIterator + "  MAIN " + mainIterator+ "  --------------------------------");
 
         jTable.updateUI();
+
+        return gameBoard;
     }
 
     // function which search for place in grid of current consider empty space based on "mainIterator" variable
@@ -233,6 +246,87 @@ public class MenuDialog extends JDialog {
             mainIterator++;
         }
 
+    }
+
+    void generate(){
+
+        //table with numbers to choose from while filling first row or column
+        Integer[] numbersToFill = {1,2,3,4,5,6,7,8,9};
+        Integer numbersCounter = 9;
+        // choosing column or row to fill first
+                if(ThreadLocalRandom.current().nextInt(0, 2) == 0){
+                    //choosing which row to fill first
+                    Integer row = ThreadLocalRandom.current().nextInt(0, 9);
+                    //filling firt row
+                    for(int column = 0 ; column < 9 ; column++){
+                        int number = ThreadLocalRandom.current().nextInt(0, numbersCounter);
+                        gameBoard[row][column] = String.valueOf(numbersToFill[number]);
+                        numbersCounter--;
+                        while(number < 8 ){
+                            numbersToFill[number] = numbersToFill[number+1];
+                            number++;
+                        }
+                    }
+                    //solve rest of the board
+                    solving(gameBoard);
+                }
+                else{
+                    //choosing which column to fill first
+                    Integer column = ThreadLocalRandom.current().nextInt(0,9);
+                    //filling first column
+                    for(int row = 0 ; row < 9 ; row++){
+                        int number = ThreadLocalRandom.current().nextInt(0, numbersCounter);
+                        gameBoard[row][column] = String.valueOf(numbersToFill[number]);
+                        numbersCounter--;
+                        while(number < 8 ){
+                            numbersToFill[number] = numbersToFill[number+1];
+                            number++;
+                        }
+                    }
+                    //solving the rest of the board
+                    solving(gameBoard);
+                }
+
+    }
+
+    String[][] prepareBoardForUser(String[][] board){
+        //numbers to erase from the board
+        Integer numbersToErase = 43;
+        List<Integer> listOfAvaibleNumbers = new ArrayList<>();
+        for(int i = 0 ; i < 81 ; i++){
+            listOfAvaibleNumbers.add(i);
+        }
+        List<List<Integer>> listOfNumbers = new ArrayList<>();
+        Integer numberToFill = 0;
+        for(int row = 0 ; row < 9 ; row++){
+            List<Integer> helpList = new ArrayList<>();
+            for(int column = 0 ; column < 9 ; column++){
+                helpList.add(numberToFill);
+                numberToFill++;
+            }
+            listOfNumbers.add(helpList);
+        }
+
+        Integer avaibleNumbersCounter = 81;
+        //erase numbers from board
+        for(int i = 0 ; i < numbersToErase ; i++){
+            //find value of number to erase
+            Integer numberToErase = ThreadLocalRandom.current().nextInt(0, avaibleNumbersCounter);
+            Integer valueToErase = listOfAvaibleNumbers.get(numberToErase);
+            //find found number on the board, and erase it
+            for(int row = 0 ; row < 9 ; row++){
+                for(int column = 0 ; column < 9 ; column++){
+                    if(listOfNumbers.get(row).get(column) == valueToErase){
+                        board[row][column] = "";
+                    }
+                }
+            }
+            listOfAvaibleNumbers.remove(numberToErase);
+            avaibleNumbersCounter--;
+
+        }
+
+        return board;
     }
 
     public static void main(String[] args) {
