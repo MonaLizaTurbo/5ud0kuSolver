@@ -11,10 +11,13 @@ public class MenuDialog extends JDialog {
     private JButton buttonSolve;
     private JButton buttonGenerate;
     private JScrollPane scrollPane;
-    private JSpinner spinnerLevel;
     private JButton buttonGenerateMultiple;
+    private JComboBox comboBoxDifficulty;
+    private JPanel jPanelInner;
 
     private JTable jTable;
+
+    JFrame jframe;
 
     //table for variables from sudoku board
     private String [][] gameBoard = new String[9][9];
@@ -35,13 +38,16 @@ public class MenuDialog extends JDialog {
     //headers of the board
     private String [] gameBoardHeaders = {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"};
 
-    private String[] spinnerLevelFiller = {"easy", "medium", "hard"};
+    private String[] comboBoxFiller = {"easy", "medium", "hard"};
 
     public MenuDialog() {
         setContentPane(contentPane);
         setModal(true);
 
-        spinnerLevel = new JSpinner(new SpinnerListModel(spinnerLevelFiller));
+        comboBoxDifficulty.addItem("easy");
+        comboBoxDifficulty.addItem("medium");
+        comboBoxDifficulty.addItem("hard");
+
 
         // initialisation of the table
         for(int row = 0 ; row < 9 ; row++){
@@ -76,7 +82,7 @@ public class MenuDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 GenerateToTXTDialog dialog = new GenerateToTXTDialog();
-                dialog.setSize(350,140);
+                dialog.setSize(400,150);
                 dialog.setVisible(true);
             }
         });
@@ -88,7 +94,12 @@ public class MenuDialog extends JDialog {
                 //generate level
                 gameBoard = SolveAndGenerateSudoku.generate(gameBoard);
                 //prepare level for game
-                gameBoard = SolveAndGenerateSudoku.prepareBoardForUser(gameBoard, 1);
+                if(comboBoxDifficulty.getSelectedItem().toString().matches("easy"))
+                    gameBoard = SolveAndGenerateSudoku.prepareBoardForUser(gameBoard, 3);
+                else if(comboBoxDifficulty.getSelectedItem().toString().matches("medium"))
+                    gameBoard = SolveAndGenerateSudoku.prepareBoardForUser(gameBoard, 2);
+                else
+                    gameBoard = SolveAndGenerateSudoku.prepareBoardForUser(gameBoard, 1);
                 //update view
                 jTable.updateUI();
 
@@ -112,7 +123,7 @@ public class MenuDialog extends JDialog {
     public static void main(String[] args) {
         MenuDialog dialog = new MenuDialog();
         dialog.pack();
-        dialog.setSize(210,257);
+        dialog.setSize(286,288);
         dialog.setVisible(true);
         System.exit(0);
     }

@@ -5,13 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GenerateToTXTDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField generateTextField;
+    private JLabel jLabelDesc;
     private JComboBox comboBoxNumberOfLevels;
+    private Pattern pattern;
 
     public static final  String[] comboBoxNumbers = {"10", "20", "30"};
 
@@ -21,12 +25,22 @@ public class GenerateToTXTDialog extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
         comboBoxNumberOfLevels = new JComboBox(comboBoxNumbers);
 
+        jLabelDesc.setText("Enter the number of levels to generate of each level of difficulty.");
 
+        //pattern to validate user input
+        pattern = Pattern.compile("^\\d*$");
+
+        buttonOK.setText("Generate");
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //check if inserted value is validn
-                //generate x levels of each difficulty
-                SolveAndGenerateSudoku.writeLevelsToJSON(Integer.valueOf(generateTextField.getText()));
+                Matcher matcher = pattern.matcher(generateTextField.getText());
+                //check if inserted value is valid
+                if(matcher.matches()) {
+                    //generate x levels of each difficulty
+                    SolveAndGenerateSudoku.writeLevelsToJSON(Integer.valueOf(generateTextField.getText()));
+                    onCancel();
+
+                }
             }
 
         });
@@ -66,6 +80,7 @@ public class GenerateToTXTDialog extends JDialog {
     public static void main(String[] args) {
         GenerateToTXTDialog dialog = new GenerateToTXTDialog();
         dialog.pack();
+        dialog.setSize(430,230);
         dialog.setVisible(true);
         System.exit(0);
     }
